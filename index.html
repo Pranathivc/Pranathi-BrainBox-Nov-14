@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiz Result Sheet — White & Purple Theme</title>
+
+  <!-- Google font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      /* white + purple theme */
+      --bg: #ffffff;
+      --page-bg: #fbf7ff;
+      --card: #f7f1ff;            /* soft purple card */
+      --muted: #6b5a82;           /* muted purple text */
+      --accent: #7b2fff;          /* strong purple */
+      --accent-light: #b383ff;    /* lighter purple */
+      --accent-soft: #eadcff;     /* very pale purple */
+      --glass: rgba(255,255,255,0.6);
+      --border: rgba(123,47,255,0.12);
+      --shadow: rgba(18,24,40,0.08);
+      --round:18px;
+    }
+
+    * { box-sizing: border-box; }
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto;
+      margin:0; background:var(--page-bg); color:#1a1124;
+      display:flex; align-items:flex-start; justify-content:center;
+      padding:28px 18px;
+    }
+
+    /* large centered container */
+    .wrap{
+      width:1180px; max-width:100%; background:#ffffff;
+      border-radius:18px; padding:28px; box-shadow:0 10px 40px rgba(12,20,60,0.06);
+      border:1px solid rgba(20,40,120,0.03);
+    }
+
+    .grid{
+      display:grid; grid-template-columns:360px 1fr; gap:24px;
+      align-items:start;
+    }
+
+    /* left column */
+    .left{ display:flex; flex-direction:column; gap:18px; }
+    .score-panel{
+      background:linear-gradient(180deg,#fff, var(--card)); border-radius:14px;
+      padding:18px; display:flex; gap:16px; align-items:center; border:1px solid var(--border);
+    }
+    .score-canvas{ width:120px; height:120px; display:flex; align-items:center; justify-content:center; }
+    .score-text h3{ margin:0; font-size:13px; color:var(--muted) }
+    .score-text .big{ font-size:30px; font-weight:700; color:var(--accent); margin-top:6px }
+    .score-text .sub{ font-size:13px; color:var(--muted); margin-top:6px; }
+
+    .stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .stat{
+      background:linear-gradient(180deg, rgba(123,47,255,0.04), rgba(179,131,255,0.015));
+      padding:14px; border-radius:12px; text-align:center; border:1px solid rgba(123,47,255,0.04);
+    }
+    .stat .num{ font-weight:700; font-size:18px; color:var(--accent) }
+    .stat .lbl{ font-size:12px; color:var(--muted) }
+
+    .actions{ margin-top:6px; display:flex; gap:12px; align-items:center; }
+    .btn{
+      padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; border:0;
+      transition:all 160ms ease;
+    }
+    .btn.primary{ background:linear-gradient(180deg,var(--accent),var(--accent-light)); color:white; box-shadow:0 8px 20px rgba(123,47,255,0.14) }
+    .btn.ghost{ background:transparent; color:var(--accent); border:1px solid rgba(123,47,255,0.08); padding:9px 12px }
+
+    /* right column */
+    .right{ display:flex; flex-direction:column; gap:18px; }
+
+    .top-cards{ display:grid; grid-template-columns:1fr 420px; gap:18px; }
+
+    .overview{
+      background:linear-gradient(180deg,#fff,var(--card)); border-radius:14px; padding:18px;
+      border:1px solid var(--border);
+    }
+    .overview .title{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .overview h4{ margin:0; font-size:16px; color:#1a1124 }
+    .overview .legend{ font-size:13px; color:var(--muted) }
+
+    .chart-wrap{ display:flex; gap:18px; align-items:center; justify-content:space-between; }
+    .chart-left{ flex:1; height:220px; padding:6px; background:transparent }
+    .chart-right{ width:280px; height:220px; padding:6px; background:transparent; }
+
+    .qa-card{
+      margin-top:4px;
+      background:linear-gradient(180deg,#fff,var(--accent-soft)); border-radius:18px; padding:18px;
+      border:1px solid rgba(123,47,255,0.06); box-shadow:0 8px 30px rgba(18,24,40,0.03);
+    }
+    .qa-card .titlebar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .qa-list{
+      max-height:340px; overflow:auto; padding-right:10px; display:flex; flex-direction:column; gap:10px;
+    }
+
+    .qa-item{
+      display:flex; gap:12px; align-items:flex-start; background:linear-gradient(180deg,#fff,var(--soft));
+      border-radius:12px; padding:12px; border:1px solid rgba(123,47,255,0.05);
+    }
+    .qa-index{
+      min-width:44px; min-height:44px; border-radius:10px; background:rgba(123,47,255,0.08); color:var(--accent);
+      display:flex; align-items:center; justify-content:center; font-weight:700;
+    }
+    .qa-body p{ margin:0 0 6px 0; font-weight:600; color:#1a1124 }
+    .qa-body .sub{ font-size:13px; color:var(--muted) }
+
+    /* custom scrollbar */
+    .qa-list::-webkit-scrollbar{ width:12px; }
+    .qa-list::-webkit-scrollbar-track{ background:transparent; }
+    .qa-list::-webkit-scrollbar-thumb{ background:linear-gradient(180deg,var(--accent-soft), #e6d9ff); border-radius:10px; border:3px solid rgba(255,255,255,0); }
+
+    @media (max-width:1100px){
+      .wrap{ padding:18px }
+      .grid{ grid-template-columns:1fr; }
+      .top-cards{ grid-template-columns:1fr; }
+      .chart-right{ width:100%; }
+      .chart-left{ height:260px }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="grid">
+      <!-- LEFT -->
+      <div class="left">
+        <div class="score-panel">
+          <div class="score-canvas"><canvas id="scoreRing" width="120" height="120"></canvas></div>
+          <div class="score-text">
+            <h3>Final Score</h3>
+            <div class="big" id="scoreValue">85%</div>
+            <div class="sub" id="scoreMsg">Great work — you passed with flying colors</div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="num" id="totalQ">20</div>
+            <div class="lbl">Total Questions</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="timeTaken">03:14</div>
+            <div class="lbl">Time Taken</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="correctCount">17</div>
+            <div class="lbl">Correct</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="wrongCount">3</div>
+            <div class="lbl">Wrong</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="retry()">Retry Quiz</button>
+          <button class="btn ghost" onclick="downloadPDF()">Download</button>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="top-cards">
+          <div class="overview">
+            <div class="title"><h4>Overview</h4><div class="legend">Accuracy by topic</div></div>
+            <div class="chart-wrap">
+              <div class="chart-left"><canvas id="topicBar"></canvas></div>
+              <div class="chart-right"><canvas id="correctPie"></canvas></div>
+            </div>
+          </div>
+
+          <div style="background:linear-gradient(180deg,#fff,var(--card)); border-radius:14px; padding:16px; border:1px solid var(--border); display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <div style="font-weight:700; color:var(--accent); font-size:28px" id="bigPercent">85%</div>
+            <div style="font-size:13px; color:var(--muted); margin-top:6px">Score</div>
+          </div>
+        </div>
+
+        <div class="qa-card">
+          <div class="titlebar">
+            <h4 style="margin:0">Question-by-question review</h4>
+            <div style="color:var(--muted)">Tap an item to expand</div>
+          </div>
+
+          <div class="qa-list" id="qaList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // sample data (replace with real API data)
+    const result = {
+      scorePercent: 85,
+      totalQuestions: 20,
+      correct: 17,
+      wrong: 3,
+      time: '03:14',
+      topics: [
+        {name:'Algebra', correct:8, total:9},
+        {name:'Geometry', correct:3, total:4},
+        {name:'Calculus', correct:4, total:5},
+        {name:'Logic', correct:2, total:2}
+      ],
+      questions: [
+        {q:'1. What is 2+2?', your:'4', correct:'4', status:'correct', explanation:''},
+        {q:'2. Area of circle formula', your:'πr^2', correct:'πr^2', status:'correct', explanation:''},
+        {q:'3. Limit of sin x / x', your:'0', correct:'1', status:'wrong', explanation:'Limit is 1 as x→0'},
+        // add more or supply real data
+      ]
+    };
+
+    // update UI numbers
+    document.getElementById('scoreValue').textContent = result.scorePercent + '%';
+    document.getElementById('bigPercent').textContent = result.scorePercent + '%';
+    document.getElementById('totalQ').textContent = result.totalQuestions;
+    document.getElementById('correctCount').textContent = result.correct;
+    document.getElementById('wrongCount').textContent = result.wrong;
+    document.getElementById('timeTaken').textContent = result.time;
+    document.getElementById('scoreMsg').textContent = result.scorePercent >= 85 ? 'Great work — you passed with flying colors' : (result.scorePercent >= 60 ? 'Good effort — room to improve' : 'Keep practicing — you can do it');
+
+    // Chart defaults
+    Chart.defaults.font.family = 'Inter, system-ui, Arial';
+
+    // Score ring (doughnut)
+    const scoreCtx = document.getElementById('scoreRing').getContext('2d');
+    new Chart(scoreCtx, {
+      type:'doughnut',
+      data:{
+        datasets:[{
+          data:[result.scorePercent, 100 - result.scorePercent],
+          backgroundColor:['var(--accent)', 'rgba(26,17,36,0.06)'],
+          borderWidth:0
+        }]
+      },
+      options:{
+        cutout: '78%',
+        responsive:false,
+        plugins:{ legend:{display:false}, tooltip:{enabled:false} },
+        rotation: -90
+      }
+    });
+
+    // Topic bar chart
+    const tctx = document.getElementById('topicBar').getContext('2d');
+    const labels = result.topics.map(t=>t.name);
+    const accuracies = result.topics.map(t => Math.round((t.correct/t.total)*100));
+    new Chart(tctx, {
+      type:'bar',
+      data:{ labels, datasets:[{ data:accuracies, backgroundColor:'#b383ff', borderRadius:8, maxBarThickness:40 }]},
+      options:{
+        plugins:{ legend:{display:false} },
+        scales:{
+          y:{ beginAtZero:true, max:100, ticks:{ stepSize:20, color:'#6b5a82' } },
+          x:{ ticks:{ color:'#6b5a82' } }
+        },
+        maintainAspectRatio:false
+      }
+    });
+
+    // Correct vs wrong pie
+    const pctx = document.getElementById('correctPie').getContext('2d');
+    new Chart(pctx, {
+      type:'pie',
+      data:{
+        labels:['Correct','Wrong'],
+        datasets:[{ data:[result.correct, result.wrong], backgroundColor:['#7b2fff','#b383ff'], borderWidth:0 }]
+      },
+      options:{ plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12 } } }, maintainAspectRatio:false }
+    });
+
+    // QA list generation (fill placeholders to match totalQuestions)
+    const qaList = document.getElementById('qaList');
+    const full = [];
+    for(let i=1;i<=result.totalQuestions;i++){
+      const existing = result.questions.find(q=>q.q && q.q.trim().startsWith(i + '.'));
+      if(existing) full.push(existing);
+      else full.push({ q:`${i}. (sample) Question text`, your:'-', correct:'-', status: i <= result.correct ? 'correct' : 'wrong', explanation:'' });
+    }
+
+    full.forEach((it, idx)=>{
+      const wrapper = document.createElement('div');
+      wrapper.className = 'qa-item';
+      const idxBox = document.createElement('div');
+      idxBox.className = 'qa-index';
+      idxBox.textContent = idx+1;
+
+      const body = document.createElement('div');
+      body.className = 'qa-body';
+      const p = document.createElement('p'); p.textContent = it.q;
+      const sub = document.createElement('div'); sub.className = 'sub';
+      sub.innerHTML = `<strong>Your:</strong> ${it.your} &nbsp;&nbsp; <strong>Answer:</strong> ${it.correct}` + (it.explanation ? ` — ${it.explanation}` : '');
+      body.appendChild(p); body.appendChild(sub);
+
+      wrapper.appendChild(idxBox); wrapper.appendChild(body);
+
+      if(it.status === 'wrong'){
+        wrapper.style.background = 'linear-gradient(180deg,#fff,#f0eaff)';
+        idxBox.style.background = 'rgba(179,131,255,0.10)';
+        idxBox.style.color = 'var(--accent-light)';
+      } else {
+        // correct styling (subtle)
+        wrapper.style.background = 'linear-gradient(180deg,#fff,#fbf7ff)';
+        idxBox.style.background = 'rgba(123,47,255,0.08)';
+      }
+
+      wrapper.addEventListener('click', ()=> wrapper.classList.toggle('expanded'));
+      qaList.appendChild(wrapper);
+    });
+
+    // Actions (stubs)
+    function retry(){ alert('Retry quiz — hook your navigation here.'); }
+    function downloadPDF(){ alert('Download PDF — integrate html2pdf or server export.'); }
+  </script>
+</body>
+</html>
